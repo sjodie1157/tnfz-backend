@@ -1,15 +1,17 @@
-import { createPool } from 'mysql';
+import mysql from 'mysql2';
 import { config } from "dotenv";
 
-config()
+config();
 
-let connection = createPool({
+const pool = mysql.createPool({
     host: process.env.HOST,
     database: process.env.DATABASE,
     user: process.env.USER,
     password: process.env.PASSWORD,
     multipleStatements: true,
     connectionLimit: 30
-}).promise()
+});
 
-export { connection }
+const connection = pool.promise();
+
+export { connection };
