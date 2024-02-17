@@ -5,6 +5,7 @@ config();
 import { createToken } from '../middleware/authenticateUser.js'; // Import createToken
 
 import { createPool } from 'mysql2/promise';
+import { hash } from 'bcrypt';
 
 const pool = createPool({
     host: process.env.HOST,
@@ -42,16 +43,22 @@ const getOneUser = async (id) => {
 
 const addUsers = async (firstName, lastName, userAge, emailAdd, userPwd, userRoll) => {
     try {
+        let hashedPassword = await hash(userPwd, 10);
         const [result] = await pool.query(`
         INSERT INTO
         bpthgztafnrghzzqjk7c.Users
         (firstName, lastName, userAge, emailAdd, userPwd, userRoll)
         VALUES(?, ?, ?, ?, ?, ?)`,
-            [firstName, lastName, userAge, emailAdd, userPwd, userRoll]);
+            [firstName, lastName, userAge, emailAdd, hashedPassword, userRoll]);
         const userID = result.insertId;
-        return getOneUser(userID);
+        let user = {
+            emailAdd,
+            userPwd: hashedPassword
+        };
+        let token = createToken(user);
+        return { token, user: await getOneUser(userID) };
     } catch (error) {
-        console.error("Error adding user:", error);
+        console.error("User Already exists", error);
         throw error;
     }
 };
