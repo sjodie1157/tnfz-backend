@@ -1,11 +1,9 @@
-import mysql from 'mysql2';
-import { config } from 'dotenv';
-config();
-
-import { createToken } from '../middleware/authenticateUser.js'; // Import createToken
-
+import { createToken } from '../middleware/authenticateUser.js';
 import { createPool } from 'mysql2/promise';
 import { hash } from 'bcrypt';
+import { config } from 'dotenv';
+
+config();
 
 const pool = createPool({
     host: process.env.HOST,
@@ -70,11 +68,16 @@ const updateUser = async (id, firstName, lastName, userAge, emailAdd, userPwd, u
         if (!existUser) {
             throw new Error("User not found");
         }
+
         firstName = firstName || existUser.firstName;
         lastName = lastName || existUser.lastName;
         userAge = userAge || existUser.userAge;
         emailAdd = emailAdd || existUser.emailAdd;
-        userPwd = userPwd || existUser.userPwd;
+        if (userPwd) {
+            userPwd = await hash(userPwd, 10);
+        } else {
+            userPwd = existUser.userPwd;
+        }
         userRoll = userRoll || existUser.userRoll;
 
         const [User] = await pool.query(
@@ -83,8 +86,12 @@ const updateUser = async (id, firstName, lastName, userAge, emailAdd, userPwd, u
             WHERE userID = ?`,
             [firstName, lastName, userAge, emailAdd, userPwd, userRoll, id]
         );
-
-        return getOneUser(id);
+        let user = {
+            emailAdd,
+            userPwd: userPwd
+        };
+        let token = createToken(user);
+        return { token, user: await getOneUser(id) };
     } catch (error) {
         console.error("Error updating User:", error);
         throw error;
