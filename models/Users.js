@@ -4,10 +4,8 @@ config();
 
 import { createToken } from '../middleware/authenticateUser.js'; // Import createToken
 
-// Import connection directly from mysql2
 import { createPool } from 'mysql2/promise';
 
-// Use createPool instead of mysql.createPool
 const pool = createPool({
     host: process.env.HOST,
     database: process.env.DATABASE,
@@ -42,7 +40,7 @@ const getOneUser = async (id) => {
     }
 };
 
-const addUser = async (firstName, lastName, userAge, emailAdd, userPwd, userRoll) => {
+const addUsers = async (firstName, lastName, userAge, emailAdd, userPwd, userRoll) => {
     try {
         const [result] = await pool.query(`
         INSERT INTO
@@ -93,4 +91,4 @@ const deleteUser = async (id) => {
     return getUsers(User);
 }
 
-export { addUser, getUsers, getOneUser, updateUser, deleteUser };
+export { addUsers, getUsers, getOneUser, updateUser, deleteUser };
