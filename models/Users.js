@@ -1,6 +1,6 @@
+import { compare, hash } from 'bcrypt';
 import { createToken } from '../middleware/authenticateUser.js';
 import { createPool } from 'mysql2/promise';
-import { hash } from 'bcrypt';
 import { config } from 'dotenv';
 
 config();
@@ -89,8 +89,8 @@ const updateUser = async (id, firstName, lastName, userAge, emailAdd, userPwd, u
             emailAdd,
             userPwd: userPwd
         };
-        let token = createToken(user);
-        return { token, user: await getOneUser(id) };
+        // let token = createToken(user);
+        return { user: await getOneUser(id) };
     } catch (error) {
         console.error("Error updating User:", error);
         throw error;
@@ -104,4 +104,30 @@ const deleteUser = async (id) => {
     return getUsers(User);
 }
 
-export { addUsers, getUsers, getOneUser, updateUser, deleteUser };
+const signIn = async (emailAdd, userPwd) => {
+    try {
+        const [users] = await pool.query(`
+            SELECT * FROM bpthgztafnrghzzqjk7c.Users
+            WHERE emailAdd = ?`, [emailAdd]);
+
+        const user = users[0];
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const match = await compare(userPwd, user.userPwd);
+
+        if (!match) {
+            throw new Error('Incorrect password');
+        }
+
+        const token = createToken({ emailAdd, userPwd });
+        return { token, user };
+    } catch (error) {
+        console.error('Error signing in:', error);
+        throw error;
+    }
+}
+
+export { addUsers, getUsers, getOneUser, updateUser, deleteUser, signIn };
