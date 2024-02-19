@@ -53,8 +53,7 @@ const addUsers = async (firstName, lastName, userAge, emailAdd, userPwd) => {
             emailAdd,
             userPwd: hashedPassword
         };
-        let token = createToken(user);
-        return { token, user: await getOneUser(userID) };
+        return { user: await getOneUser(userID) };
     } catch (error) {
         console.error("User Already exists", error);
         throw error;
