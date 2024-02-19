@@ -39,7 +39,7 @@ const getOneUser = async (id) => {
     }
 };
 
-const addUsers = async (firstName, lastName, userAge, emailAdd, userPwd, userRoll) => {
+const addUsers = async (firstName, lastName, userAge, emailAdd, userPwd) => {
     try {
         let hashedPassword = await hash(userPwd, 10);
         const [result] = await pool.query(`
@@ -47,7 +47,7 @@ const addUsers = async (firstName, lastName, userAge, emailAdd, userPwd, userRol
         bpthgztafnrghzzqjk7c.Users
         (firstName, lastName, userAge, emailAdd, userPwd, userRoll)
         VALUES(?, ?, ?, ?, ?, ?)`,
-            [firstName, lastName, userAge, emailAdd, hashedPassword, userRoll]);
+            [firstName, lastName, userAge, emailAdd, hashedPassword, "User"]);
         const userID = result.insertId;
         let user = {
             emailAdd,
