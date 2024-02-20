@@ -6,7 +6,9 @@ export default {
             const users = await getUsers();
             res.send(users);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({
+                message: error.message
+            });
         }
     },
     getOneUser: async (req, res) => {
@@ -14,7 +16,9 @@ export default {
             const user = await getOneUser(+req.params.id);
             res.send(user);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({
+                message: error.message
+            });
         }
     },
     addUsers: async (req, res) => {
@@ -23,7 +27,9 @@ export default {
             const newUser = await addUsers(firstName, lastName, userAge, emailAdd, userPwd, userRoll);
             res.send(newUser);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({
+                message: error.message
+            });
         }
     },
     updateUser: async (req, res) => {
@@ -44,7 +50,9 @@ export default {
             const users = await getUsers();
             res.json(users);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({
+                message: error.message
+            });
         }
     },
     deleteUser: async (req, res) => {
@@ -62,10 +70,21 @@ export default {
         const { emailAdd, userPwd } = req.body;
         try {
             const { token, user } = await signIn(emailAdd, userPwd);
+            res.cookie('webtoken', token, { httpOnly: false });
             res.json({ token, user });
         } catch (error) {
             res.json({
                 msg: error.message
+            });
+        }
+    },
+    signOut: async (req, res) => {
+        try {
+            res.clearCookie('webtoken');
+            res.json({ message: 'Successfully signed out' });
+        } catch (error) {
+            res.status(500).json({
+                message: error.message
             });
         }
     }

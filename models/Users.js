@@ -3,6 +3,7 @@ import { createToken } from '../middleware/authenticateUser.js';
 import { createPool } from 'mysql2/promise';
 import { config } from 'dotenv';
 
+
 config();
 
 const pool = createPool({
@@ -89,7 +90,6 @@ const updateUser = async (id, firstName, lastName, userAge, emailAdd, userPwd, u
             emailAdd,
             userPwd: userPwd
         };
-        // let token = createToken(user);
         return { user: await getOneUser(id) };
     } catch (error) {
         console.error("Error updating User:", error);
@@ -107,9 +107,8 @@ const deleteUser = async (id) => {
 const signIn = async (emailAdd, userPwd) => {
     try {
         const [users] = await pool.query(`
-            SELECT * FROM bpthgztafnrghzzqjk7c.Users
+            SELECT userID ,firstName, lastName, userAge, emailAdd, userPwd, userRoll FROM bpthgztafnrghzzqjk7c.Users
             WHERE emailAdd = ?`, [emailAdd]);
-
         const user = users[0];
 
         if (!user) {
