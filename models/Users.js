@@ -106,6 +106,10 @@ const deleteUser = async (id) => {
 
 const signIn = async (emailAdd, userPwd) => {
     try {
+        if (!emailAdd || !userPwd) {
+            throw new Error('Email or password cannot be empty');
+        }
+
         const [users] = await pool.query(`
             SELECT userID ,firstName, lastName, userAge, emailAdd, userPwd, userRoll FROM bpthgztafnrghzzqjk7c.Users
             WHERE emailAdd = ?`, [emailAdd]);
@@ -128,5 +132,6 @@ const signIn = async (emailAdd, userPwd) => {
         throw error;
     }
 }
+
 
 export { addUsers, getUsers, getOneUser, updateUser, deleteUser, signIn };
