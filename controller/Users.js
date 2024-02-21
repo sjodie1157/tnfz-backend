@@ -4,66 +4,54 @@ export default {
     getUsers: async (req, res) => {
         try {
             const users = await getUsers();
-            res.send(users);
+            res.json(users);
         } catch (error) {
-            res.status(500).json({
-                message: error.message
-            });
+            res.status(500).json({ error: "Internal Server Error" });
         }
     },
     getOneUser: async (req, res) => {
         try {
             const user = await getOneUser(+req.params.id);
-            res.send(user);
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
+            }
+            res.json(user);
         } catch (error) {
-            res.status(500).json({
-                message: error.message
-            });
+            res.status(500).json({ error: "Internal Server Error" });
         }
     },
     addUsers: async (req, res) => {
         const { firstName, lastName, userAge, emailAdd, userPwd, userRoll } = req.body;
         try {
             const newUser = await addUsers(firstName, lastName, userAge, emailAdd, userPwd, userRoll);
-            res.send(newUser);
+            res.status(201).json(newUser);
         } catch (error) {
-            res.status(500).json({
-                message: error.message
-            });
+            res.status(400).json({ error: error.message });
         }
     },
     updateUser: async (req, res) => {
         try {
-            const [existingUser] = await getOneUser(+req.params.id);
+            const existingUser = await getOneUser(+req.params.id);
+            if (!existingUser) {
+                return res.status(404).json({ error: "User not found" });
+            }
 
             const { firstName, lastName, userAge, emailAdd, userPwd, userRoll } = req.body;
 
-            const updatedfirstName = firstName !== undefined ? firstName : existingUser.firstName;
-            const updatedlastName = lastName !== undefined ? lastName : existingUser.lastName;
-            const updateduserAge = userAge !== undefined ? userAge : existingUser.userAge;
-            const updatedemailAdd = emailAdd !== undefined ? emailAdd : existingUser.emailAdd;
-            const updateduserPwd = userPwd !== undefined ? userPwd : existingUser.userPwd;
-            const updateduserRoll = userRoll !== undefined ? userRoll : existingUser.userRoll;
+            // Update user logic
 
-            await updateUser(req.params.id, updatedfirstName, updatedlastName, updateduserAge, updatedemailAdd, updateduserPwd, updateduserRoll);
-
-            const users = await getUsers();
-            res.json(users);
+            const updatedUser = await updateUser(req.params.id, updatedFields);
+            res.json(updatedUser);
         } catch (error) {
-            res.status(500).json({
-                message: error.message
-            });
+            res.status(500).json({ error: "Internal Server Error" });
         }
     },
     deleteUser: async (req, res) => {
         try {
             const deletedUser = await deleteUser(req.params.id);
-            res.send(deletedUser);
+            res.json({ message: "User deleted successfully" });
         } catch (error) {
-            res.json({
-                status: statusCode,
-                msg: error.message
-            });
+            res.status(500).json({ error: "Internal Server Error" });
         }
     },
     signIn: async (req, res) => {
@@ -73,9 +61,7 @@ export default {
             res.cookie('webtoken', token, { httpOnly: false });
             res.json({ token, user });
         } catch (error) {
-            res.json({
-                msg: error.message
-            });
+            res.status(401).json({ error: "Invalid credentials" });
         }
     },
     signOut: async (req, res) => {
@@ -83,9 +69,7 @@ export default {
             res.clearCookie('webtoken');
             res.json({ message: 'Successfully signed out' });
         } catch (error) {
-            res.status(500).json({
-                message: error.message
-            });
+            res.status(500).json({ error: "Internal Server Error" });
         }
     }
 };
