@@ -3,7 +3,6 @@ import { createToken } from '../middleware/authenticateUser.js';
 import { createPool } from 'mysql2/promise';
 import { config } from 'dotenv';
 
-
 config();
 
 const pool = createPool({
@@ -30,9 +29,9 @@ const getUsers = async () => {
 const getOneUser = async (id) => {
     try {
         const [result] = await pool.query(`
-        SELECT userID, firstName, lastName, userAge, emailAdd, userPwd, userRoll
-        FROM bpthgztafnrghzzqjk7c.Users
-        WHERE userID = ?`, [id]);
+            SELECT userID, firstName, lastName, userAge, emailAdd, userPwd, userRoll
+            FROM bpthgztafnrghzzqjk7c.Users
+            WHERE userID = ?`, [id]);
         return result;
     } catch (error) {
         console.error("Error getting one user:", error);
@@ -44,10 +43,10 @@ const addUsers = async (firstName, lastName, userAge, emailAdd, userPwd) => {
     try {
         let hashedPassword = await hash(userPwd, 10);
         const [result] = await pool.query(`
-        INSERT INTO
-        bpthgztafnrghzzqjk7c.Users
-        (firstName, lastName, userAge, emailAdd, userPwd, userRoll)
-        VALUES(?, ?, ?, ?, ?, ?)`,
+            INSERT INTO
+            bpthgztafnrghzzqjk7c.Users
+            (firstName, lastName, userAge, emailAdd, userPwd, userRoll)
+            VALUES(?, ?, ?, ?, ?, ?)`,
             [firstName, lastName, userAge, emailAdd, hashedPassword, "User"]);
         const userID = result.insertId;
         let user = {
@@ -61,7 +60,7 @@ const addUsers = async (firstName, lastName, userAge, emailAdd, userPwd) => {
     }
 };
 
-const updateUser = async (id, firstName, lastName, userAge, emailAdd, userPwd, userRoll) => {
+const updateUser = async (id, updatedFields) => {
     try {
         const [existUser] = await getOneUser(id);
 
@@ -69,40 +68,33 @@ const updateUser = async (id, firstName, lastName, userAge, emailAdd, userPwd, u
             throw new Error("User not found");
         }
 
-        firstName = firstName || existUser.firstName;
-        lastName = lastName || existUser.lastName;
-        userAge = userAge || existUser.userAge;
-        emailAdd = emailAdd || existUser.emailAdd;
-        if (userPwd) {
-            userPwd = await hash(userPwd, 10);
-        } else {
-            userPwd = existUser.userPwd;
-        }
-        userRoll = userRoll || existUser.userRoll;
+        const setClause = Object.keys(updatedFields).map(field => `${field} = ?`).join(', ');
+
+        const params = [...Object.values(updatedFields), id];
 
         const [User] = await pool.query(
             `UPDATE bpthgztafnrghzzqjk7c.Users
-            SET firstName = ?, lastName = ?, userAge = ?, emailAdd = ?, userPwd = ?, userRoll = ?
+            SET ${setClause}
             WHERE userID = ?`,
-            [firstName, lastName, userAge, emailAdd, userPwd, userRoll, id]
+            params
         );
         let user = {
-            emailAdd,
-            userPwd: userPwd
+            emailAdd: updatedFields.emailAdd,
+            userPwd: updatedFields.userPwd
         };
         return { user: await getOneUser(id) };
     } catch (error) {
         console.error("Error updating User:", error);
         throw error;
     }
-}
+};
 
 const deleteUser = async (id) => {
     const [User] = await pool.query(`
-    DELETE FROM bpthgztafnrghzzqjk7c.Users 
-    WHERE userID = ?`, [id])
+        DELETE FROM bpthgztafnrghzzqjk7c.Users 
+        WHERE userID = ?`, [id]);
     return getUsers(User);
-}
+};
 
 const signIn = async (emailAdd, userPwd) => {
     try {
@@ -111,7 +103,7 @@ const signIn = async (emailAdd, userPwd) => {
         }
 
         const [users] = await pool.query(`
-            SELECT userID ,firstName, lastName, userAge, emailAdd, userPwd, userRoll FROM bpthgztafnrghzzqjk7c.Users
+            SELECT userID, firstName, lastName, userAge, emailAdd, userPwd, userRoll FROM bpthgztafnrghzzqjk7c.Users
             WHERE emailAdd = ?`, [emailAdd]);
         const user = users[0];
 
@@ -131,7 +123,6 @@ const signIn = async (emailAdd, userPwd) => {
         console.error('Error signing in:', error);
         throw error;
     }
-}
-
+};
 
 export { addUsers, getUsers, getOneUser, updateUser, deleteUser, signIn };
