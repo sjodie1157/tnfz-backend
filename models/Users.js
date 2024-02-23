@@ -1,5 +1,5 @@
 import { compare, hash } from 'bcrypt';
-import { createToken } from '../middleware/authenticateUser.js';
+import { createToken } from '../middleware/AuthenticateUsers.js';
 import { createPool } from 'mysql2/promise';
 import { config } from 'dotenv';
 
