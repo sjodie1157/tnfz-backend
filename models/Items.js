@@ -15,7 +15,7 @@ const pool = createPool({
 const getItems = async () => {
     try {
         const [result] = await pool.query(`
-            SELECT prodID, prodName, quantity, amount, category, prodURL
+            SELECT prodID, prodName, quantity, amount, catagory, prodURL
             FROM bpthgztafnrghzzqjk7c.Items;
         `);
         return result;
@@ -28,7 +28,7 @@ const getItems = async () => {
 const getSingleItem = async (id) => {
     try {
         const [result] = await pool.query(`
-            SELECT prodID, prodName, quantity, amount, category, prodURL
+            SELECT prodID, prodName, quantity, amount, catagory, prodURL
             FROM bpthgztafnrghzzqjk7c.Items
             WHERE prodID = ?`, [id]);
         return result;
@@ -38,19 +38,34 @@ const getSingleItem = async (id) => {
     }
 };
 
-const addItem = async (prodName, quantity, amount, category, prodURL) => {
+// const addItems = async (prodName, quantity, amount, category, prodURL) => {
+//     try {
+//         const [result] = await pool.query(`
+//             INSERT INTO
+//             
+//             VALUES (?, ?, ?, ?, ?);`,
+//             [prodName, quantity, amount, category, prodURL]);
+//         const prodID = result.insertId;
+//         return { item: await getSingleItem(prodID) };
+//     } catch (error) {
+//         console.error("Error adding item:", error.message);
+//         throw error;
+//     }
+// };
+
+const addItems = async (prodName, quantity, amount, category, prodURL) => {
     try {
         const [result] = await pool.query(`
             INSERT INTO
-            bpthgztafnrghzzqjk7c.Items (prodName, quantity, amount, category, prodURL)
-            VALUES (?, ?, ?, ?, ?);`,
+            bpthgztafnrghzzqjk7c.Items (prodName, quantity, amount, catagory, prodURL)
+            VALUES(?, ?, ?, ?, ?)`,
             [prodName, quantity, amount, category, prodURL]);
         const prodID = result.insertId;
-        return { item: await getSingleItem(prodID) };
+        return { user: await getOneUser(prodID) };
     } catch (error) {
-        console.error("Error adding item:", error.message);
+        console.error("User Already exists", error);
         throw error;
     }
 };
 
-export { getItems, getSingleItem, addItem };
+export { getItems, getSingleItem, addItems };

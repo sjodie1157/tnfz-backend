@@ -5,6 +5,6 @@ const ItemsRouter = express.Router();
 
 ItemsRouter.get('/', controller.getItems);
 ItemsRouter.get('/:id', controller.getSingleItem);
-ItemsRouter.get('/addItems', controller.addItem);
+ItemsRouter.post('/addNewItem', controller.addItems);
 
 export default ItemsRouter;

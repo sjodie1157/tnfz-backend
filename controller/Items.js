@@ -1,4 +1,4 @@
-import { addItem, getItems, getSingleItem } from "../models/Items.js";
+import { addItems, getItems, getSingleItem } from "../models/Items.js";
 
 export default {
     getItems: async (req, res) => {
@@ -23,13 +23,13 @@ export default {
             res.status(500).json({ error: "Failed to retrieve item" });
         }
     },
-    addItem: async (req, res) => {
-        const { prodName, quantity, amount, category, prodURL } = req.body;
+    addItems: async (req, res) => {
+        const { prodName, quantity, amount, catagory, prodURL } = req.body;
         try {
-            if (!prodName || !quantity || !amount || !category || !prodURL) {
+            if (!prodName || !quantity || !amount || !catagory || !prodURL) {
                 return res.status(400).json({ error: "Missing required fields" });
             }
-            const newItem = await addItem(prodName, quantity, amount, category, prodURL);
+            const newItem = await addItems(prodName, quantity, amount, catagory, prodURL);
             res.status(201).json(newItem);
         } catch (error) {
             console.error("Error adding item:", error);
